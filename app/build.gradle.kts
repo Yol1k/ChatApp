@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.psi.psiUtil.canPlaceAfterSimpleNameEntry
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)

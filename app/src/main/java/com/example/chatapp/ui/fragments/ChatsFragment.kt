@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.chatapp.databinding.FragmentChatsBinding
 
-class ChatsFragment : Fragment() {
+class FragmentChatsBinding : Fragment() {
     private var _binding: FragmentChatsBinding? = null
     private val binding get() = _binding!!
 
