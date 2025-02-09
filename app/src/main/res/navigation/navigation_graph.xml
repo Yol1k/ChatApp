@@ -1,6 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/navigation_graph">
+    android:id="@+id/navigation_graph"
+    app:startDestination="@id/fragmentChatsBinding">
+    <fragment
+        android:id="@+id/fragmentChatsBinding"
+        android:name="com.example.chatapp.ui.fragments.FragmentChatsBinding"
+        android:label="FragmentChatsBinding" >
+        <action
+            android:id="@+id/action_fragmentChatsBinding_to_fragmentChatBinding2"
+            app:destination="@id/fragmentChatBinding2"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentChatBinding2"
+        android:name="com.example.chatapp.ui.fragments.FragmentChatBinding"
+        android:label="FragmentChatBinding" >
+        <action
+            android:id="@+id/action_fragmentChatBinding2_to_fragmentContactsBinding"
+            app:destination="@id/fragmentContactsBinding"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
 
+    <fragment
+        android:id="@+id/fragmentContactsBinding"
+        android:name="com.example.chatapp.ui.fragments.FragmentContactsBinding"
+        android:label="FragmentContactsBinding" />
 </navigation>
