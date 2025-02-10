@@ -7,10 +7,16 @@ xmlns:android="http://schemas.android.com/apk/res/android"
     android:gravity="center"
     >
     <Button
-        android:id="@+id/btn_open_chat"
+        android:id="@+id/open_chat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Открыть чат" />
+
+    <Button
+        android:id="@+id/back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Назад" />
 
     <TextView
         android:id="@+id/textView"

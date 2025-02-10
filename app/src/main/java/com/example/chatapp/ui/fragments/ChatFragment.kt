@@ -4,9 +4,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.chatapp.databinding.FragmentChatsBinding
 
-class FragmentChatBinding : Fragment() {
+class ChatFragment : Fragment() {
     private var _binding: FragmentChatsBinding? = null
     private val binding get() = _binding!!
 
@@ -21,6 +22,11 @@ class FragmentChatBinding : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.textView.text = "Чат"
+
+        binding.back.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
     }
 
     override fun onDestroyView() {

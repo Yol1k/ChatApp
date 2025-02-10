@@ -2,35 +2,34 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/navigation_graph"
-    app:startDestination="@id/fragmentChatsBinding">
+    app:startDestination="@id/chatsFragment">
     <fragment
-        android:id="@+id/fragmentChatsBinding"
-        android:name="com.example.chatapp.ui.fragments.FragmentChatsBinding"
-        android:label="FragmentChatsBinding" >
-        <action
-            android:id="@+id/action_fragmentChatsBinding_to_fragmentChatBinding2"
-            app:destination="@id/fragmentChatBinding2"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
-    </fragment>
-    <fragment
-        android:id="@+id/fragmentChatBinding2"
-        android:name="com.example.chatapp.ui.fragments.FragmentChatBinding"
-        android:label="FragmentChatBinding" >
-        <action
-            android:id="@+id/action_fragmentChatBinding2_to_fragmentContactsBinding"
-            app:destination="@id/fragmentContactsBinding"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"/>
+        android:id="@+id/chatsFragment"
+        android:name="com.example.chatapp.ui.fragments.ChatsFragment"
+        android:label="Чаты" >
+    <action
+        android:id="@+id/action_chatsFragment_to_chatFragment"
+        app:destination="@id/chatFragment"
+        app:enterAnim="@anim/slide_in_right"
+        app:exitAnim="@anim/slide_out_left"
+        app:popEnterAnim="@anim/slide_in_left"
+        app:popExitAnim="@anim/slide_out_right"/>
     </fragment>
 
     <fragment
-        android:id="@+id/fragmentContactsBinding"
-        android:name="com.example.chatapp.ui.fragments.FragmentContactsBinding"
-        android:label="FragmentContactsBinding" />
+        android:id="@+id/contactsFragment"
+        android:name="com.example.chatapp.ui.fragments.ContactsFragment"
+        android:label="Контакты"
+        />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.chatapp.ui.fragments.SettingsFragment"
+        android:label="Настройки" />
+
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.example.chatapp.ui.fragments.ChatFragment"
+        android:label="Чат" />
+
 </navigation>

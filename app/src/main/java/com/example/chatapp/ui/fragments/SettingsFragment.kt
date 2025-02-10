@@ -5,10 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.chatapp.databinding.FragmentChatsBinding
-import androidx.navigation.fragment.findNavController
-import com.example.chatapp.R
 
-class ChatsFragment: Fragment() {
+class SettingsFragment: Fragment() {
     private var _binding: FragmentChatsBinding? = null
     private val binding get() = _binding!!
 
@@ -22,12 +20,7 @@ class ChatsFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.textView.text = "Чаты"
-
-        binding.openChat.setOnClickListener {
-            findNavController().navigate(R.id.action_chatsFragment_to_chatFragment)
-        }
-
+        binding.textView.text = "Настройки"
     }
 
     override fun onDestroyView() {
