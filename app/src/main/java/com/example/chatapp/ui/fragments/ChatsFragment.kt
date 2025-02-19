@@ -22,7 +22,7 @@ class ChatsFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.textView.text = "Чаты"
+        binding.chats.text = "Чаты"
 
         binding.openChat.setOnClickListener {
             findNavController().navigate(R.id.action_chatsFragment_to_chatFragment)

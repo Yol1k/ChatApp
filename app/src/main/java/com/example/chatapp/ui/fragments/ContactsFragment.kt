@@ -4,23 +4,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.chatapp.databinding.FragmentChatsBinding
+import com.example.chatapp.databinding.FragmentContactsBinding
 
 class ContactsFragment: Fragment() {
-    private var _binding: FragmentChatsBinding? = null
+    private var _binding: FragmentContactsBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentChatsBinding.inflate(inflater, container, false)
+        _binding = FragmentContactsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.textView.text = "Контакты"
+        binding.contacts.text = "Контакты"
     }
 
     override fun onDestroyView() {

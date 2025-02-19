@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation_graph"
     app:startDestination="@id/chatsFragment">
     <fragment
         android:id="@+id/chatsFragment"
         android:name="com.example.chatapp.ui.fragments.ChatsFragment"
-        android:label="Чаты" >
+        android:label="fragment_chats"
+        tools:layout="@layout/fragment_chats">
     <action
         android:id="@+id/action_chatsFragment_to_chatFragment"
         app:destination="@id/chatFragment"
@@ -19,17 +21,22 @@
     <fragment
         android:id="@+id/contactsFragment"
         android:name="com.example.chatapp.ui.fragments.ContactsFragment"
-        android:label="Контакты"
+        android:label="fragment_contacts"
+        tools:layout="@layout/fragment_contacts"
         />
 
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.chatapp.ui.fragments.SettingsFragment"
-        android:label="Настройки" />
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings"
+        />
 
     <fragment
         android:id="@+id/chatFragment"
         android:name="com.example.chatapp.ui.fragments.ChatFragment"
-        android:label="Чат" />
+        android:label="fragment_chat"
+        tools:layout="@layout/fragment_chat"
+        />
 
 </navigation>

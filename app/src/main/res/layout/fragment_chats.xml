@@ -5,23 +5,20 @@ xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    >
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="ui.fragments.ChatsFragment">
+
+    <TextView
+        android:id="@+id/chats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Чаты"
+        android:textSize="24sp" />
+
     <Button
         android:id="@+id/open_chat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Открыть чат" />
 
-    <Button
-        android:id="@+id/back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Назад" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Чаты"
-        android:textSize="24sp" />
 </LinearLayout>
