@@ -6,19 +6,23 @@
     android:layout_height="match_parent"
     android:gravity="center"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="ui.fragments.ChatFragment">
+    tools:context="ui.fragments.ChatFragment"
+    android:background="?backgroundSecondaryColor">
 
     <TextView
         android:id="@+id/chat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Чат"
-        android:textSize="24sp" />
+        android:textSize="24sp"
+        />
 
     <Button
         android:id="@+id/back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Назад" />
+        android:text="Назад"
+        android:background="?backgroundPrimaryColor"
+        android:textColor="?backgroundSecondaryColor"/>
 
 </LinearLayout>

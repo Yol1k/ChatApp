@@ -6,8 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity"
-    >
+    tools:context=".MainActivity">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
@@ -29,5 +28,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/bottom_navigation_view" />
+        app:menu="@menu/bottom_navigation_view"
+        app:itemIconTint="@color/white"
+        android:background="?bottomNavigationStyle"
+        />
 </LinearLayout>

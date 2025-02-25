@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.ChatApp" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.ChatApp" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="backgroundPrimaryColor">@color/blue</item>
+        <item name="backgroundSecondaryColor">@color/white</item>
+        <item name="textColorPrimary">@color/black</item>
+        <item name="textColorSecondary">@color/black</item>
+        <item name="android:statusBarColor">?backgroundPrimaryColor</item>
+        <item name="iconColorPrimary">@color/black</item>
+        <item name="iconColorSecondary">@color/gray</item>
+        <item name="colorBackground">@color/white</item>
+        <item name="bottomNavigationStyle">@color/gray</item>
+    </style>
 </resources>

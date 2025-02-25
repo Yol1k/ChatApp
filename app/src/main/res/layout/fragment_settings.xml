@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="ui.fragments.SettingsFragment">
+    android:orientation="vertical"
+    tools:context="ui.fragments.SettingsFragment"
+    android:background="?colorBackground">
 
     <TextView
         android:id="@+id/settings"
@@ -14,4 +16,16 @@
         android:layout_height="wrap_content"
         android:text="Настройки"
         android:textSize="24sp" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:textSize="30dp"
+        android:id="@+id/theme_switcher"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:gravity="center_vertical"
+        android:paddingEnd="10dp"
+        android:text="Тёмная тема"
+        app:thumbTint="@color/black"
+        app:trackTint="@color/gray" />
 </LinearLayout>
