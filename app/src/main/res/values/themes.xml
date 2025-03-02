@@ -11,5 +11,6 @@
         <item name="iconColorSecondary">@color/gray</item>
         <item name="colorBackground">@color/white</item>
         <item name="bottomNavigationStyle">@color/gray</item>
+        <item name="btnLogout">@color/red</item>
     </style>
 </resources>

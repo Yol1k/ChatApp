@@ -8,4 +8,5 @@
     <attr name="iconColorSecondary" format="reference|color" />
     <attr name="colorBackground" format="reference|color"/>
     <attr name="bottomNavigationStyle" format="reference|color"/>
+    <attr name="btnLogout" format="reference|color"/>
 </resources>

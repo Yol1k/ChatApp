@@ -45,6 +45,19 @@ android {
 }
 
 dependencies {
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    //Библиотеки для токена
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    //Основная библиотека Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    //Конвертер для работы с JSON
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    //Базовая библиотека для работы с сетью
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    //Библиотека для автоматического логирования запросов в консоль
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    //Библиотеки для навигации фрагментов
     implementation ("androidx.navigation:navigation-fragment-ktx:2.8.6")
     implementation ("androidx.navigation:navigation-ui-ktx:2.8.6")
     implementation(libs.androidx.core.ktx)
