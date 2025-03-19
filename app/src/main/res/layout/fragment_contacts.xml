@@ -7,11 +7,36 @@
     android:gravity="center"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="ui.fragments.ContactsFragment">
-    >
-    <TextView
-        android:id="@+id/contacts"
-        android:layout_width="wrap_content"
+
+    <!-- Поле поиска -->
+    <SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Контакты"
-        android:textSize="24sp" />
+        android:queryHint="Поиск контактов" />
+
+    <!-- Список контактов -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/contactsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp" />
+
+    <!-- Кнопка для входящих запросов -->
+    <Button
+        android:id="@+id/incomingRequestsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Входящие запросы"
+        android:layout_marginTop="16dp" />
+
+    <!-- Кнопка для поиска пользователей -->
+    <Button
+        android:id="@+id/searchUsersButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Поиск пользователей"
+        android:layout_marginTop="8dp" />
+
 </LinearLayout>

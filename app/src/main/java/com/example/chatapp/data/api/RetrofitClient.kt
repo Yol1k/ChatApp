@@ -1,5 +1,6 @@
 package com.example.chatapp.data.api
 
+import ContactsApi
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -15,6 +16,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitClient {
     private const val BASE_URL = "https://api.nogamenolife.pro/"
     private val mainHandler = Handler(Looper.getMainLooper())
+
+    val retrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
 
     fun create(context: Context, view: View?): AuthApi {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
