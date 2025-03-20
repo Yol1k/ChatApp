@@ -1,6 +1,7 @@
 package com.example.chatapp.ui.contacts.view_models
 
 import ContactsApi
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.chatapp.data.api.RetrofitClient.retrofit
 import com.example.chatapp.ui.contacts.AcceptContactRequest
 import com.example.chatapp.ui.contacts.AddContact
 import com.example.chatapp.ui.contacts.Contact
@@ -38,9 +38,18 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
     private val _outgoingRequests = MutableLiveData<List<ContactRequest>>()
     val outgoingRequests: LiveData<List<ContactRequest>> get() = _outgoingRequests
 
+    private val _searchResults = MutableLiveData<List<Contact>>()
+    val searchResults: LiveData<List<Contact>> get() = _searchResults
+
     fun loadContacts(){
-        val contacts = ContactsApi.getContacts()
-        _contacts.value = contacts
+        viewModelScope.launch {
+            try {
+                val contacts = ContactsApi.getContacts()
+                _contacts.value = contacts
+            } catch (e: Exception) {
+                _contacts.value = emptyList() // Очистить список в случае ошибки
+            }
+        }
     }
 
     fun loadIncomingRequests(){
@@ -77,6 +86,19 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
             val request = DeclineContactRequest(requestId)
             ContactsApi.declineRequest(request)
             loadIncomingRequests()
+        }
+    }
+    fun searchUsers(query: String, limit: Int? = null) {
+        viewModelScope.launch {
+            try {
+                val results = ContactsApi.searchUsers(query, limit)
+                Log.d("SearchUsers", "API results: $results")
+                _searchResults.value = results
+            } catch (e: Exception) {
+                // Обработка ошибки
+                Log.e("SearchUsers", "Error: ${e.message}", e)
+                _searchResults.value = emptyList()
+            }
         }
     }
 }

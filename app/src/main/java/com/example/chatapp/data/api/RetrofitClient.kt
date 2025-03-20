@@ -17,14 +17,7 @@ object RetrofitClient {
     private const val BASE_URL = "https://api.nogamenolife.pro/"
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    val retrofit: Retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    fun create(context: Context, view: View?): AuthApi {
+    fun <T> create(context: Context, view: View?, service: java.lang.Class<T> ): T {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -57,7 +50,6 @@ object RetrofitClient {
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(AuthApi::class.java)
-
+            .create(service)
     }
 }

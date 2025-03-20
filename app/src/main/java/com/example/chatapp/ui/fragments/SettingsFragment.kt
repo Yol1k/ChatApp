@@ -1,4 +1,5 @@
 package com.example.chatapp.ui.fragments
+import ContactsApi
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -62,7 +63,7 @@ class SettingsFragment: Fragment() {
             logout()
         }
 
-        RetrofitClient.create(requireContext(), view).getUser().enqueue(
+        RetrofitClient.create(requireContext(), view, AuthApi::class.java).getUser().enqueue(
             object :
                 Callback<UserResponse> {
                 override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {

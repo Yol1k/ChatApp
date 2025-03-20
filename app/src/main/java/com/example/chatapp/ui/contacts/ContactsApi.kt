@@ -7,11 +7,13 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.Header
+import retrofit2.http.Query
 
 interface ContactsApi {
 
     @GET("contacts")
-    fun getContacts(): List<Contact>
+    suspend fun getContacts(): List<Contact>
 
     @GET("/contacts/in_request")
     fun getInRequests(): List<ContactRequest>
@@ -27,4 +29,10 @@ interface ContactsApi {
 
     @POST("/contacts/decline")
     fun declineRequest(@Body request: DeclineContactRequest)
+
+    @GET("/users/search")
+    suspend fun searchUsers(
+        @Query("search") query: String,
+        @Query("limit") limit: Int? = null,
+    ): List<Contact>
 }
