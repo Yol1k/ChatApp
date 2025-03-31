@@ -3,6 +3,7 @@ package com.example.chatapp.ui.contacts.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -13,10 +14,13 @@ class ContactsAdapter(private var contacts: List<Contact>) : RecyclerView.Adapte
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val contactName: TextView = itemView.findViewById(R.id.contactName)
-        //private val contactAvatar: ImageView = itemView.findViewById(R.id.contactAvatar)
+
+        private val addContactButton = itemView.findViewById<Button>(R.id.AddContactButton)
 
         fun bind(contact: Contact) {
             contactName.text = contact.name
+
+            //addContactButton.setOnClickListener{ addContact(contact)}
         }
     }
 

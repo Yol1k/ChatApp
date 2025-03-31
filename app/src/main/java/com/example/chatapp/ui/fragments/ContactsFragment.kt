@@ -1,5 +1,6 @@
 package com.example.chatapp.ui.fragments
 import ContactsApi
+import IncomingRequestsFragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.chatapp.databinding.FragmentContactsBinding
 import com.example.chatapp.ui.contacts.view_models.ContactsViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chatapp.R
@@ -63,6 +63,13 @@ class ContactsFragment: Fragment() {
             dialog.show(parentFragmentManager, "SearchUsersDialog")
         }
 
+        binding.incomingRequestsButton.setOnClickListener {
+            // Создаем экземпляр фрагмента
+            val fragment = IncomingRequestsFragment.newInstance(viewModel)
+
+            // Открываем фрагмент как диалоговое окно
+            fragment.show(parentFragmentManager, "incoming_requests_dialog")
+        }
     }
 
     override fun onDestroyView() {

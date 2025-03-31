@@ -2,14 +2,18 @@ package com.example.chatapp.ui.contacts
 
 data class Contact(
     val id: String,
-    val name: String
+    val name: String,
+    val login: String,
+    val avatar: String
 )
 
 data class ContactRequest(
     val userId: String,
     val requestId: String,
     val name: String,
-    val status: String
+    val login: String,
+    val status: String,
+    val avatar: String
 )
 
 data class AddContact(

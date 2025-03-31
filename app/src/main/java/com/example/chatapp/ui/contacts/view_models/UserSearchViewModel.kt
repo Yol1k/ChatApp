@@ -1,6 +1,8 @@
 package com.example.chatapp.ui.fragments
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +20,8 @@ class UserSearchViewModel : DialogFragment() {
 
     private lateinit var usersAdapter: UserSearchAdapter
     private lateinit var viewModel: ContactsViewModel
+    private lateinit var searchEditText: EditText
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,22 +30,28 @@ class UserSearchViewModel : DialogFragment() {
         val view = inflater.inflate(R.layout.dialog_search_users, container, false)
 
         // Настройка RecyclerView
-        val recyclerView = view.findViewById<RecyclerView>(R.id.usersRecyclerView)
+        recyclerView = view.findViewById<RecyclerView>(R.id.usersRecyclerView)
+
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         usersAdapter = UserSearchAdapter(emptyList()) { user ->
-            // Обработка нажатия на пользователя (например, отправка запроса)
-            viewModel.addContact(user.id)
+            // Обработка нажатия на пользователя (отправка запроса)
+            viewModel.addContact(userId = user.userId)
             dismiss() // Закрыть диалог после отправки запроса
         }
         recyclerView.adapter = usersAdapter
 
-        val searchEditText = view.findViewById<EditText>(R.id.searchEditText)
-        val searchButton = view.findViewById<Button>(R.id.searchButton)
-        searchButton.setOnClickListener {
-            val query = searchEditText.text.toString()
-            Log.d("SearchUsers", "Search query: $query")
-            viewModel.searchUsers(query) // Выполняем поиск по введенному запросу
-        }
+        searchEditText = view.findViewById<EditText>(R.id.searchEditText)
+
+        searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val query = s.toString()
+                viewModel.searchUsers(query) // Вызов метода поиска в ViewModel
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
         // Наблюдение за результатами поиска
         viewModel.searchResults.observe(viewLifecycleOwner) { users ->
@@ -56,9 +66,15 @@ class UserSearchViewModel : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         //Установим размер равный MATCH_PARENT по ширине и высоте
         dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewModel.resetSearchState()
     }
 
     companion object {

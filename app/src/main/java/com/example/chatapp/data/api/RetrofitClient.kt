@@ -14,17 +14,19 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "https://api.nogamenolife.pro/"
+    private const val BASE_URL = "https://api.nogamenolife.pro"
     private val mainHandler = Handler(Looper.getMainLooper())
 
     fun <T> create(context: Context, view: View?, service: java.lang.Class<T> ): T {
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
 
         val authInterceptor = Interceptor { chain ->
+            val token = TokenManager.getToken(context)
+            println("Token: $token") // Логируем токен
+
             val request = chain.request().newBuilder().apply {
                 TokenManager.getToken(context)?.let { token ->
+                    addHeader("Accept", "application/json")
+                    addHeader("Content-Type", "application/json")
                     addHeader("Authorization", "Bearer $token")
                 }
             }.build()
@@ -41,7 +43,9 @@ object RetrofitClient {
         }
 
         val client = OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY  // Смотрим заголовки
+            })
             .addInterceptor(authInterceptor)
             .build()
 

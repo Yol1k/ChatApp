@@ -14,6 +14,8 @@ import com.example.chatapp.ui.contacts.AddContact
 import com.example.chatapp.ui.contacts.Contact
 import com.example.chatapp.ui.contacts.ContactRequest
 import com.example.chatapp.ui.contacts.DeclineContactRequest
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
@@ -40,6 +42,14 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
 
     private val _searchResults = MutableLiveData<List<Contact>>()
     val searchResults: LiveData<List<Contact>> get() = _searchResults
+
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> get() = _isLoading
+
+    private val _errorMessage = MutableLiveData<String?>()
+    val errorMessage: LiveData<String?> get() = _errorMessage
+
+    private var searchJob: Job? = null
 
     fun loadContacts(){
         viewModelScope.launch {
@@ -70,6 +80,7 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
         viewModelScope.launch {
             val request = AddContact(userId)
             ContactsApi.addContact(request)
+            loadOutgoingRequests()
         }
     }
 
@@ -78,6 +89,7 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
             val request = AcceptContactRequest(requestId)
             ContactsApi.acceptRequest(request)
             loadIncomingRequests()
+            loadContacts()
         }
     }
 
@@ -88,8 +100,17 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
             loadIncomingRequests()
         }
     }
+
     fun searchUsers(query: String, limit: Int? = null) {
-        viewModelScope.launch {
+        if (query.isEmpty()) {
+            _searchResults.value = emptyList() // Показываем пустой список, если запрос пустой
+            return
+        }
+
+        searchJob?.cancel() // Отменяем предыдущий запрос, если он есть
+        searchJob = viewModelScope.launch {
+            _isLoading.value = true // Показываем индикатор загрузки
+            delay(300) // Задержка 300 мс перед выполнением запроса
             try {
                 val results = ContactsApi.searchUsers(query, limit)
                 Log.d("SearchUsers", "API results: $results")
@@ -98,7 +119,16 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
                 // Обработка ошибки
                 Log.e("SearchUsers", "Error: ${e.message}", e)
                 _searchResults.value = emptyList()
+            } finally {
+                _isLoading.value = false // Скрываем индикатор загрузки
             }
         }
     }
+
+    fun resetSearchState() {
+        _searchResults.value = emptyList()
+        _errorMessage.value = null
+        _isLoading.value = false
+    }
+
 }

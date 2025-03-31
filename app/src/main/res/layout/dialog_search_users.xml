@@ -22,12 +22,4 @@
         android:layout_marginTop="16dp"
         />
 
-    <!-- Кнопка "Найти" -->
-    <Button
-        android:id="@+id/searchButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Найти"
-        android:layout_gravity="bottom"/>
-
 </LinearLayout>
