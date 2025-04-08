@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.chatapp.databinding.FragmentContactsBinding
@@ -43,7 +44,7 @@ class ContactsFragment: Fragment() {
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.contactsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        contactsAdapter = ContactsAdapter(emptyList())
+        contactsAdapter = ContactsAdapter()
         recyclerView.adapter = contactsAdapter
 
         viewModel.loadContacts()
@@ -70,6 +71,18 @@ class ContactsFragment: Fragment() {
             // Открываем фрагмент как диалоговое окно
             fragment.show(parentFragmentManager, "incoming_requests_dialog")
         }
+
+        binding.searchViewContacts.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+            //Вызывается при нажатии кнопки подтверждения
+            override fun onQueryTextSubmit(query: String?) = false
+            //Вызывается при изменении текста
+            override fun onQueryTextChange(newText: String?): Boolean {
+            //Фильтруем список используя текст введенный пользователем
+                contactsAdapter.filter.filter(newText)
+                return true
+            }
+        })
+
     }
 
     override fun onDestroyView() {

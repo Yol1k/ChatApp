@@ -4,24 +4,45 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageView
+import android.widget.Filter
+import android.widget.Filterable
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.chatapp.ui.contacts.Contact
 import com.example.chatapp.R
+import android.widget.ImageView
 
-class ContactsAdapter(private var contacts: List<Contact>) : RecyclerView.Adapter<ContactsAdapter.ViewHolder>() {
+class ContactsAdapter : RecyclerView.Adapter<ContactsAdapter.ViewHolder>(), Filterable {
+
+    private var contacts = listOf<Contact>()
+
+    private var filteredContacts = mutableListOf<Contact>()
+
+    private val placeholderAvatar = R.drawable.ic_person
+
+    fun updateContacts(newContacts: List<Contact>) {
+        contacts = newContacts
+        filteredContacts = newContacts.toMutableList()
+        notifyDataSetChanged()
+    }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val contactName: TextView = itemView.findViewById(R.id.contactName)
 
-        private val addContactButton = itemView.findViewById<Button>(R.id.AddContactButton)
+        private val contactName: TextView = itemView.findViewById(R.id.contactName)
+        private val contactAvatar: ImageView = itemView.findViewById(R.id.avatarImageView)
 
         fun bind(contact: Contact) {
             contactName.text = contact.name
 
-            //addContactButton.setOnClickListener{ addContact(contact)}
+            Glide.with(itemView.context)
+                .load(contact.avatar) // URL аватара из объекта Contact
+                .placeholder(placeholderAvatar) // Заглушка, если аватар не загружен
+                .error(placeholderAvatar) // Заглушка при ошибке загрузки
+                .circleCrop() // Делаем аватар круглым
+                .into(contactAvatar)
         }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -30,13 +51,37 @@ class ContactsAdapter(private var contacts: List<Contact>) : RecyclerView.Adapte
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(contacts[position])
+        holder.bind(filteredContacts[position])
     }
 
-    override fun getItemCount(): Int = contacts.size
+    override fun getItemCount(): Int = filteredContacts.size
 
-    fun updateContacts(newContacts: List<Contact>) {
-        contacts = newContacts
-        notifyDataSetChanged()
+
+    override fun getFilter() = object : Filter() {
+        override fun performFiltering(constraint: CharSequence?): FilterResults {
+
+            val results = FilterResults()
+            val filtered: MutableList<Contact> = mutableListOf()
+
+            if (constraint.isNullOrEmpty()) {
+                filtered.addAll(contacts)
+            } else {
+                for (user in contacts) {
+                    if (user.name.contains(constraint, true)) {
+                        filtered.add(user)
+                    }
+                }
+            }
+
+            results.values = filtered
+            results.count = filtered.size
+            return results
+        }
+
+        override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+            filteredContacts = results?.values as? MutableList<Contact> ?: mutableListOf()
+            notifyDataSetChanged()
+        }
     }
+
 }

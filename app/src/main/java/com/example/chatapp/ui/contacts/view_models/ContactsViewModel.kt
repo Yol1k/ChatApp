@@ -1,7 +1,11 @@
 package com.example.chatapp.ui.contacts.view_models
 
 import ContactsApi
+import android.content.Context
+import android.net.Uri
 import android.util.Log
+import android.webkit.MimeTypeMap
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,6 +21,9 @@ import com.example.chatapp.ui.contacts.DeclineContactRequest
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
 
@@ -50,6 +57,9 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
     val errorMessage: LiveData<String?> get() = _errorMessage
 
     private var searchJob: Job? = null
+
+    private val _avatarUrl = MutableLiveData<String?>()
+    val avatarUrl: LiveData<String?> = _avatarUrl
 
     fun loadContacts(){
         viewModelScope.launch {
