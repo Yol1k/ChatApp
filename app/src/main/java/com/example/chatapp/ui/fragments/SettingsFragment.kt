@@ -23,7 +23,6 @@ import com.example.chatapp.data.api.AuthApi
 import com.example.chatapp.data.api.RetrofitClient
 import com.example.chatapp.data.models.UserResponse
 import com.example.chatapp.databinding.FragmentSettingsBinding
-import com.example.chatapp.ui.contacts.ContactRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -71,21 +70,17 @@ class SettingsFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.loadUser() // Загружаем данные пользователя
-        viewModel.avatarUrl.observe(viewLifecycleOwner) { url ->
-            url?.let { Glide.with(this).load(it).into(binding.avatarImageView) }
-        }
+        // Загружаем аватар при открытии
+        viewModel.loadUserAvatar()
 
-        viewModel.avatarUrl.observe(viewLifecycleOwner) { newUrl ->
-            newUrl?.let { url ->
-                Glide.with(this)
-                    .load(url)
-                    .placeholder(R.drawable.ic_person)
-                    .circleCrop()
-                    .into(binding.avatarImageView)
-            }
+        // Обновляем UI при изменении аватара
+        viewModel.avatarUrl.observe(viewLifecycleOwner) { avatarUrl ->
+            Glide.with(this)
+                .load(avatarUrl)
+                .placeholder(R.drawable.ic_person)
+                .circleCrop()
+                .into(binding.avatarImageView)
         }
-
 
         binding.settings.text = "Настройки"
 
@@ -116,7 +111,7 @@ class SettingsFragment: Fragment() {
             }
         }
 
-            viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
+        viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
         }
 
@@ -130,24 +125,24 @@ class SettingsFragment: Fragment() {
         RetrofitClient.create(requireContext(), AuthApi::class.java)
             .getUser()
             .enqueue(
-            object :
-                Callback<UserResponse> {
-                override fun onResponse(
-                    call: Call<UserResponse>,
-                    response: Response<UserResponse>
-                ) {
-                    if (response.isSuccessful) {
-                        response.body()?.name.let { name ->
-                            binding.username.text = name
+                object :
+                    Callback<UserResponse> {
+                    override fun onResponse(
+                        call: Call<UserResponse>,
+                        response: Response<UserResponse>
+                    ) {
+                        if (response.isSuccessful) {
+                            response.body()?.name.let { name ->
+                                binding.username.text = name
+                            }
                         }
                     }
-                }
 
-                override fun onFailure(p0: Call<UserResponse>, t: Throwable) {
-                    Toast.makeText(requireContext(), "Ошибка загрузки: ${t.message}", Toast.LENGTH_SHORT).show()
-                    Log.e("SettingsFragment", "getUser error", t)
-                }
-            })
+                    override fun onFailure(p0: Call<UserResponse>, t: Throwable) {
+                        Toast.makeText(requireContext(), "Ошибка загрузки: ${t.message}", Toast.LENGTH_SHORT).show()
+                        Log.e("SettingsFragment", "getUser error", t)
+                    }
+                })
 
     }
 

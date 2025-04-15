@@ -1,12 +1,6 @@
 package com.example.chatapp.data.api
 
-import ContactsApi
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
-import android.view.View
-import androidx.navigation.Navigation
-import com.example.chatapp.R
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

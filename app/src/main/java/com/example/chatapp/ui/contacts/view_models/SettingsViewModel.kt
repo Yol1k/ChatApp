@@ -1,7 +1,6 @@
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
-import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -19,7 +18,6 @@ import java.io.IOException
 
 class SettingsViewModel(
     private val contactsApi: ContactsApi,
-    private var sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
     companion object {
@@ -30,8 +28,7 @@ class SettingsViewModel(
             viewModelFactory {
                 initializer {
                     SettingsViewModel(
-                        contactsApi = contactsApi,
-                        sharedPreferences = sharedPreferences
+                        contactsApi = contactsApi
                     )
                 }
             }}
@@ -67,23 +64,17 @@ class SettingsViewModel(
         class Error<T>(error: Throwable): Resource<T>(error = error)
     }
 
-    fun saveAvatarUrl(url: String) {
-        sharedPreferences.edit().putString("avatar_url", url).apply()
-    }
-
-    fun loadAvatarUrl(): String? {
-        return sharedPreferences.getString("avatar_url", null)
-    }
-
-    init {
-        loadPersistedAvatar()
-    }
-
-    private fun loadPersistedAvatar() {
+    fun loadUserAvatar() {
         viewModelScope.launch {
-            _avatar.value = loadAvatarUrl() // Загружаем сохраненный URL
+            try {
+                val response = contactsApi.getUser()
+                _avatar.value = response.avatar // URL аватара с сервера
+            } catch (e: Exception) {
+                _avatar.value = null
+            }
         }
     }
+
 
     fun updateAvatar(uri: Uri, context: Context) {
         viewModelScope.launch {
@@ -117,10 +108,9 @@ class SettingsViewModel(
                 val response = contactsApi.updateAvatar(filePart)
 
                 if (response.isSuccessful) {
-                    val avatarUrl = response.body() // Получаем строку с URL
-                    if (!avatarUrl.isNullOrEmpty()) {
-                        _avatar.value = avatarUrl
-                        saveAvatarUrl(avatarUrl) // Сохраняем новый URL
+                    val avatar = response.body() // Получаем строку с URL
+                    if (!avatar.isNullOrEmpty()) {
+                        _avatar.value = avatar
                         _uploadState.value = Resource.Success(Unit)
                     } else {
                         throw IOException("Пустой ответ от сервера")

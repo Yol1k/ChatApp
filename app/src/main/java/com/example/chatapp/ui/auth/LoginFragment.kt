@@ -1,6 +1,5 @@
 package com.example.chatapp.ui.auth
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,21 +8,16 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.example.chatapp.MainActivity
 import com.example.chatapp.R
 import com.example.chatapp.data.api.AuthApi
 import com.example.chatapp.data.api.TokenManager
 import com.example.chatapp.data.models.LoginRequest
 import com.example.chatapp.data.models.LoginResponse
-import com.example.chatapp.data.models.RegisterRequest
-import com.example.chatapp.data.models.RegisterResponse
 import com.example.chatapp.data.models.errors.AuthErrorBody422
 import com.example.chatapp.databinding.FragmentLoginBinding
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
