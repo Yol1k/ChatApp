@@ -3,6 +3,7 @@ import com.example.chatapp.ui.contacts.AddContact
 import com.example.chatapp.ui.contacts.Contact
 import com.example.chatapp.ui.contacts.ContactRequest
 import com.example.chatapp.ui.contacts.DeclineContactRequest
+import com.example.chatapp.ui.contacts.UserResponse
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -38,6 +39,9 @@ interface ContactsApi {
         @Query("search") query: String,
         @Query("limit") limit: Int? = null,
     ): List<Contact>
+
+    @GET("/users/user")
+    suspend fun getUser(): UserResponse
 
     @Multipart
     @PATCH("/users/update/avatar")

@@ -1,14 +1,18 @@
 package com.example.chatapp.ui.fragments
 import ContactsApi
+import SettingsViewModel
+import SettingsViewModel.Resource
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -19,40 +23,40 @@ import com.example.chatapp.data.api.AuthApi
 import com.example.chatapp.data.api.RetrofitClient
 import com.example.chatapp.data.models.UserResponse
 import com.example.chatapp.databinding.FragmentSettingsBinding
+import com.example.chatapp.ui.contacts.ContactRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import kotlin.getValue
 
 class SettingsFragment: Fragment() {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
-    private lateinit var authApi: AuthApi
     private lateinit var sharedPreferences: SharedPreferences
 
-    private val contactsApi by lazy {
-        RetrofitClient.create(requireContext(), view, ContactsApi::class.java)
-    }
-    private val viewModel by viewModels<SettingsViewModel> {
-        SettingsViewModel.getViewModelFactory(contactsApi)
+    private val authApi: AuthApi by lazy {
+        RetrofitClient.create(requireContext(), AuthApi::class.java)
     }
 
-    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let { viewModel.uploadAvatar(it, requireContext()) }
+    private val contactsApi: ContactsApi by lazy {
+        RetrofitClient.create(requireContext(), ContactsApi::class.java)
+    }
+
+    private val viewModel by viewModels<SettingsViewModel> {
+        val sharedPrefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        SettingsViewModel.getViewModelFactory(contactsApi, sharedPrefs)
+    }
+
+    private val pickImage = registerForActivityResult(PickVisualMedia()) { uri: Uri? ->
+        if (uri != null) {
+            viewModel.updateAvatar(uri, requireContext())
+        } else {
+            Toast.makeText(requireContext(), "Изображение не выбрано", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Инициализируем sharedPreferences в onCreate
-        sharedPreferences = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.nogamenolife.pro/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        authApi = retrofit.create(AuthApi::class.java)
     }
 
     override fun onCreateView(
@@ -67,11 +71,13 @@ class SettingsFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        loadSavedAvatar()
+        viewModel.loadUser() // Загружаем данные пользователя
+        viewModel.avatarUrl.observe(viewLifecycleOwner) { url ->
+            url?.let { Glide.with(this).load(it).into(binding.avatarImageView) }
+        }
 
         viewModel.avatarUrl.observe(viewLifecycleOwner) { newUrl ->
             newUrl?.let { url ->
-                saveAvatarLocally(url)
                 Glide.with(this)
                     .load(url)
                     .placeholder(R.drawable.ic_person)
@@ -92,126 +98,127 @@ class SettingsFragment: Fragment() {
         }
 
         binding.changeAvatarButton.setOnClickListener {
-            pickImage.launch("image/*")
+            pickImage.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
         }
 
-        // Обновляем аватар при изменении LiveData
-        viewModel.avatarUrl.observe(viewLifecycleOwner) { newUrl ->
-            Glide.with(this)
-                .load(newUrl)
-                .placeholder(R.drawable.ic_person) // Заглушка
-                .circleCrop() // Круглый аватар
-                .into(binding.avatarImageView)
+        viewModel.uploadState.observe(viewLifecycleOwner) { resource ->
+            when (resource) {
+                is Resource.Loading -> showProgress()
+                is Resource.Success -> {
+                    hideProgress()
+                    showSuccess("Аватар обновлён")
+                }
+
+                is Resource.Error -> {
+                    hideProgress()
+                    showError(resource.error)
+                }
+            }
         }
 
-        // Показываем ошибки
-        viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
+            viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
         }
 
-            val retrofit = Retrofit.Builder()
-                .baseUrl("https://api.nogamenolife.pro/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-            authApi = retrofit.create(AuthApi::class.java)
+        sharedPreferences =
+            requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
-            sharedPreferences =
-                requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        binding.btnLogout.setOnClickListener {
+            logout()
+        }
 
-            binding.btnLogout.setOnClickListener {
-                logout()
-            }
-
-            RetrofitClient.create(requireContext(), view, AuthApi::class.java).getUser().enqueue(
-                object :
-                    Callback<UserResponse> {
-                    override fun onResponse(
-                        call: Call<UserResponse>,
-                        response: Response<UserResponse>
-                    ) {
-                        if (response.isSuccessful) {
-                            response.body()?.name.let { name ->
-                                binding.username.text = name
-                            }
+        RetrofitClient.create(requireContext(), AuthApi::class.java)
+            .getUser()
+            .enqueue(
+            object :
+                Callback<UserResponse> {
+                override fun onResponse(
+                    call: Call<UserResponse>,
+                    response: Response<UserResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        response.body()?.name.let { name ->
+                            binding.username.text = name
                         }
                     }
+                }
 
-                    override fun onFailure(p0: Call<UserResponse?>, p1: Throwable) {
-                    }
-                })
+                override fun onFailure(p0: Call<UserResponse>, t: Throwable) {
+                    Toast.makeText(requireContext(), "Ошибка загрузки: ${t.message}", Toast.LENGTH_SHORT).show()
+                    Log.e("SettingsFragment", "getUser error", t)
+                }
+            })
 
-        }
+    }
 
-        override fun onDestroyView() {
-            super.onDestroyView()
-            _binding = null
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 
-        private fun setDarkTheme() {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        }
+    private fun setDarkTheme() {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+    }
 
-        private fun setLightTheme() {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
+    private fun setLightTheme() {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+    }
 
-        private fun logout() {
-            // Получаем токен из SharedPreferences
-            val token = sharedPreferences.getString("auth_token", null)
+    private fun showProgress() {
+        binding.progressBar.visibility = View.VISIBLE
+    }
 
-            if (token != null) {
-                // Вызываем API для выхода
-                val call = authApi.logout()
-                call.enqueue(object : Callback<Void> {
-                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                        if (response.isSuccessful) {
-                            // Очищаем SharedPreferences
-                            sharedPreferences.edit().clear().apply()
+    private fun hideProgress() {
+        binding.progressBar.visibility = View.GONE
+    }
 
-                            // Перенаправляем пользователя на экран входа
-                            findNavController().navigate(R.id.authFragment)
-                        } else {
-                            // Обработка ошибки
-                            Toast.makeText(
-                                requireContext(),
-                                "Ошибка при выходе",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
+    private fun showSuccess(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
 
-                    override fun onFailure(call: Call<Void>, t: Throwable) {
-                        // Обработка ошибки сети
+    private fun showError(error: Throwable?) {
+        val message = error?.message ?: "Неизвестная ошибка"
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun logout() {
+        // Получаем токен из SharedPreferences
+        val token = sharedPreferences.getString("auth_token", null)
+
+        if (token != null) {
+            // Вызываем API для выхода
+            val call = authApi.logout()
+            call.enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if (response.isSuccessful) {
+                        // Очищаем SharedPreferences
+                        sharedPreferences.edit().clear().apply()
+
+                        // Перенаправляем пользователя на экран входа
+                        findNavController().navigate(R.id.authFragment)
+                    } else {
+                        // Обработка ошибки
                         Toast.makeText(
                             requireContext(),
-                            "Ошибка сети: ${t.message}",
+                            "Ошибка при выходе",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                })
-            } else {
-                // Если токен отсутствует, просто перенаправляем на экран входа
-                findNavController().navigate(R.id.authFragment)
-            }
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    // Обработка ошибки сети
+                    Toast.makeText(
+                        requireContext(),
+                        "Ошибка сети: ${t.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
+        } else {
+            // Если токен отсутствует, просто перенаправляем на экран входа
+            findNavController().navigate(R.id.authFragment)
         }
-
-    private fun saveAvatarLocally(avatarUrl: String) {
-        sharedPreferences.edit().putString("avatar_url", avatarUrl).apply()
-    }
-
-    private fun loadSavedAvatar() {
-        val savedUrl = sharedPreferences.getString("avatar_url", null)
-        savedUrl?.let { url ->
-            Glide.with(this)
-                .load(url)
-                .placeholder(R.drawable.ic_person)
-                .circleCrop()
-                .into(binding.avatarImageView)
-        }
-    }
-
-    private fun clearAvatar() {
-        sharedPreferences.edit().remove("avatar_url").apply()
     }
 
 }

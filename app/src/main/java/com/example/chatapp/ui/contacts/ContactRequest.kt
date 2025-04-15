@@ -16,6 +16,16 @@ data class ContactRequest(
     val avatar: String
 )
 
+data class UserResponse(
+    var id: String,
+    val name: String,
+    val login: String,
+    val avatar: String,
+    var isInContacts: Boolean,
+    var hasPendingRequest: Boolean,
+    var incomeRequestId: String
+)
+
 data class AddContact(
     val userId: String
 )

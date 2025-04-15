@@ -15,45 +15,49 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     private const val BASE_URL = "https://api.nogamenolife.pro"
-    private val mainHandler = Handler(Looper.getMainLooper())
+    private var retrofit: Retrofit? = null
 
-    fun <T> create(context: Context, view: View?, service: java.lang.Class<T> ): T {
+    fun <T> create(context: Context, service: Class<T>): T {
+        if (retrofit == null) {
+            retrofit = Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(createOkHttpClient(context))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+        }
+        return retrofit!!.create(service)
+    }
 
-        val authInterceptor = Interceptor { chain ->
-            val token = TokenManager.getToken(context)
-            println("Token: $token") // Логируем токен
+    private fun createOkHttpClient(context: Context): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(createLoggingInterceptor())
+            .addInterceptor(createAuthInterceptor(context))
+            .build()
+    }
 
+    private fun createLoggingInterceptor(): Interceptor {
+        return HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+    }
+
+    private fun createAuthInterceptor(context: Context): Interceptor {
+        return Interceptor { chain ->
             val request = chain.request().newBuilder().apply {
                 TokenManager.getToken(context)?.let { token ->
-                    addHeader("Accept", "application/json")
-                    addHeader("Content-Type", "application/json")
                     addHeader("Authorization", "Bearer $token")
                 }
+                addHeader("Accept", "application/json")
+                addHeader("Content-Type", "application/json")
             }.build()
 
             val response = chain.proceed(request)
+
             if (response.code == 401) {
                 TokenManager.clearToken(context)
-                if (view != null)
-                    mainHandler.post {
-                        Navigation.findNavController(view).popBackStack(R.id.authFragment, false)
-                    }
+                // Ошибка будет обработана в вызывающем коде
             }
             response
         }
-
-        val client = OkHttpClient.Builder()
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY  // Смотрим заголовки
-            })
-            .addInterceptor(authInterceptor)
-            .build()
-
-        return Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(service)
     }
 }

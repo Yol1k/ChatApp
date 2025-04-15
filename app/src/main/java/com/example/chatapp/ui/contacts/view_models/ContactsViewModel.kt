@@ -25,14 +25,14 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
-class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
+class ContactsViewModel(val contactsApi: ContactsApi) : ViewModel() {
 
     companion object {
-        fun getViewModelFactory(ContactsApi: ContactsApi): ViewModelProvider.Factory =
+        fun getViewModelFactory(contactsApi: ContactsApi): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
                     ContactsViewModel(
-                        ContactsApi = ContactsApi
+                        contactsApi = contactsApi
                     )
                 }
             }}
@@ -64,7 +64,7 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
     fun loadContacts(){
         viewModelScope.launch {
             try {
-                val contacts = ContactsApi.getContacts()
+                val contacts = contactsApi.getContacts()
                 _contacts.value = contacts
             } catch (e: Exception) {
                 _contacts.value = emptyList() // Очистить список в случае ошибки
@@ -74,14 +74,14 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
 
     fun loadIncomingRequests(){
         viewModelScope.launch {
-            val requests = ContactsApi.getInRequests()
+            val requests = contactsApi.getInRequests()
             _incomingRequests.value = requests
         }
     }
 
     fun loadOutgoingRequests(){
         viewModelScope.launch {
-            val requests = ContactsApi.getOutRequests()
+            val requests = contactsApi.getOutRequests()
             _outgoingRequests.value = requests
         }
     }
@@ -89,7 +89,7 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
     fun addContact(userId: String) {
         viewModelScope.launch {
             val request = AddContact(userId)
-            ContactsApi.addContact(request)
+            contactsApi.addContact(request)
             loadOutgoingRequests()
         }
     }
@@ -97,7 +97,7 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
     fun acceptContactRequest(requestId: String) {
         viewModelScope.launch {
             val request = AcceptContactRequest(requestId)
-            ContactsApi.acceptRequest(request)
+            contactsApi.acceptRequest(request)
             loadIncomingRequests()
             loadContacts()
         }
@@ -106,7 +106,7 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
     fun declineContactRequest(requestId: String) {
         viewModelScope.launch {
             val request = DeclineContactRequest(requestId)
-            ContactsApi.declineRequest(request)
+            contactsApi.declineRequest(request)
             loadIncomingRequests()
         }
     }
@@ -122,7 +122,7 @@ class ContactsViewModel(val ContactsApi: ContactsApi) : ViewModel() {
             _isLoading.value = true // Показываем индикатор загрузки
             delay(300) // Задержка 300 мс перед выполнением запроса
             try {
-                val results = ContactsApi.searchUsers(query, limit)
+                val results = contactsApi.searchUsers(query, limit)
                 Log.d("SearchUsers", "API results: $results")
                 _searchResults.value = results
             } catch (e: Exception) {

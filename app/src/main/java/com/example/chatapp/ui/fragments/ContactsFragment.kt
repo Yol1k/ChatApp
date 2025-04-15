@@ -21,7 +21,7 @@ class ContactsFragment: Fragment() {
     private lateinit var contactsAdapter: ContactsAdapter
 
     private val contactsApi by lazy {
-        RetrofitClient.create(requireContext(), view, ContactsApi::class.java)
+        RetrofitClient.create(requireContext(), ContactsApi::class.java)
     }
 
     private val viewModel by viewModels<ContactsViewModel> {
