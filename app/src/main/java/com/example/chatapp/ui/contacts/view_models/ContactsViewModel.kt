@@ -50,12 +50,6 @@ class ContactsViewModel(val contactsApi: ContactsApi) : ViewModel() {
     private val _searchResults = MutableLiveData<List<Contact>>()
     val searchResults: LiveData<List<Contact>> get() = _searchResults
 
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> get() = _isLoading
-
-    private val _errorMessage = MutableLiveData<String?>()
-    val errorMessage: LiveData<String?> get() = _errorMessage
-
     private var searchJob: Job? = null
 
     private val _avatarUrl = MutableLiveData<String?>()
@@ -119,7 +113,6 @@ class ContactsViewModel(val contactsApi: ContactsApi) : ViewModel() {
 
         searchJob?.cancel() // Отменяем предыдущий запрос, если он есть
         searchJob = viewModelScope.launch {
-            _isLoading.value = true // Показываем индикатор загрузки
             delay(300) // Задержка 300 мс перед выполнением запроса
             try {
                 val results = contactsApi.searchUsers(query, limit)
@@ -129,16 +122,12 @@ class ContactsViewModel(val contactsApi: ContactsApi) : ViewModel() {
                 // Обработка ошибки
                 Log.e("SearchUsers", "Error: ${e.message}", e)
                 _searchResults.value = emptyList()
-            } finally {
-                _isLoading.value = false // Скрываем индикатор загрузки
             }
         }
     }
 
     fun resetSearchState() {
         _searchResults.value = emptyList()
-        _errorMessage.value = null
-        _isLoading.value = false
     }
 
 }

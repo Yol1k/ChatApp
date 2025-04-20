@@ -42,9 +42,6 @@ class SettingsViewModel(
     private val _userData = MutableLiveData<UserResponse>()
     val userData: LiveData<UserResponse> get() = _userData
 
-    private val _uploadState = MutableLiveData<Resource<Unit>>()
-    val uploadState: LiveData<Resource<Unit>> = _uploadState
-
     fun loadUser() {
         viewModelScope.launch {
             try {
@@ -53,15 +50,6 @@ class SettingsViewModel(
                 _errorMessage.value = "Ошибка загрузки данных"
             }
         }
-    }
-
-    sealed class Resource<T>(
-        val data: T? = null,
-        val error: Throwable? = null
-    ) {
-        class Loading<T>: Resource<T>()
-        class Success<T>(data: T): Resource<T>(data = data)
-        class Error<T>(error: Throwable): Resource<T>(error = error)
     }
 
     fun loadUserAvatar() {
@@ -78,7 +66,6 @@ class SettingsViewModel(
 
     fun updateAvatar(uri: Uri, context: Context) {
         viewModelScope.launch {
-            _uploadState.value = Resource.Loading()
 
             try {
                 // 1. Проверка MIME-типа
@@ -111,7 +98,6 @@ class SettingsViewModel(
                     val avatar = response.body() // Получаем строку с URL
                     if (!avatar.isNullOrEmpty()) {
                         _avatar.value = avatar
-                        _uploadState.value = Resource.Success(Unit)
                     } else {
                         throw IOException("Пустой ответ от сервера")
                     }
@@ -123,7 +109,6 @@ class SettingsViewModel(
                     }
                 }
             } catch (e: Exception) {
-                _uploadState.value = Resource.Error(e)
                 _errorMessage.value = when (e) {
                     is IOException -> e.message ?: "Ошибка загрузки"
                     else -> "Ошибка: ${e.localizedMessage}"

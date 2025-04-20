@@ -1,21 +1,17 @@
+package com.example.chatapp.ui.contacts.dialogs
+
+import IncomingRequestsAdapter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.chatapp.ui.contacts.view_models.ContactsViewModel
-import com.example.chatapp.R
 import com.example.chatapp.databinding.DialogIncomingRequestsBinding
-import com.example.chatapp.ui.fragments.UserSearchViewModel
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
-class IncomingRequestsFragment : DialogFragment() {
+class IncomingRequestsDialogFragment : DialogFragment() {
     private lateinit var binding: DialogIncomingRequestsBinding
     private lateinit var adapter: IncomingRequestsAdapter
     private lateinit var viewModel: ContactsViewModel
@@ -52,7 +48,7 @@ class IncomingRequestsFragment : DialogFragment() {
 
         binding.incomingRequestsRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = this@IncomingRequestsFragment.adapter
+            adapter = this@IncomingRequestsDialogFragment.adapter
         }
     }
 
@@ -75,8 +71,8 @@ class IncomingRequestsFragment : DialogFragment() {
     }
 
     companion object {
-        fun newInstance(viewModel: ContactsViewModel): IncomingRequestsFragment {
-            val fragment = IncomingRequestsFragment()
+        fun newInstance(viewModel: ContactsViewModel): IncomingRequestsDialogFragment {
+            val fragment = IncomingRequestsDialogFragment()
             fragment.viewModel = viewModel
             return fragment
         }

@@ -4,8 +4,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.chatapp.ui.contacts.Contact
 import com.example.chatapp.R
 import com.example.chatapp.ui.contacts.AddContact
@@ -26,9 +28,18 @@ class UserSearchAdapter(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val contactName: TextView = itemView.findViewById(R.id.contactName)
         private val addButton: Button = itemView.findViewById(R.id.AddContactButton)
+        private val contactAvatar: ImageView = itemView.findViewById(R.id.contactAvatar)
+        private val placeholderAvatar = R.drawable.ic_person
 
         fun bind(contact: Contact) {
             contactName.text = contact.name
+
+            Glide.with(itemView.context)
+                .load(contact.avatar) // URL аватара из объекта Contact
+                .placeholder(placeholderAvatar) // Заглушка, если аватар не загружен
+                .error(placeholderAvatar) // Заглушка при ошибке загрузки
+                .circleCrop() // Делаем аватар круглым
+                .into(contactAvatar)
 
             addButton.setOnClickListener {
                 val addButton = AddContact(userId = contact.id)

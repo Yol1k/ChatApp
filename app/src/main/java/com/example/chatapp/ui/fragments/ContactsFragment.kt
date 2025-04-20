@@ -1,6 +1,6 @@
 package com.example.chatapp.ui.fragments
 import ContactsApi
-import IncomingRequestsFragment
+import com.example.chatapp.ui.contacts.dialogs.IncomingRequestsDialogFragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.chatapp.R
 import com.example.chatapp.data.api.RetrofitClient
 import com.example.chatapp.ui.contacts.adapters.ContactsAdapter
+import com.example.chatapp.ui.contacts.dialogs.UserSearchDialogFragment
 
 class ContactsFragment: Fragment() {
 
@@ -34,7 +35,7 @@ class ContactsFragment: Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentContactsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -60,13 +61,13 @@ class ContactsFragment: Fragment() {
         }
 
         binding.searchUsersButton.setOnClickListener {
-            val dialog = UserSearchViewModel.newInstance(viewModel)
+            val dialog = UserSearchDialogFragment.newInstance(viewModel)
             dialog.show(parentFragmentManager, "SearchUsersDialog")
         }
 
         binding.incomingRequestsButton.setOnClickListener {
             // Создаем экземпляр фрагмента
-            val fragment = IncomingRequestsFragment.newInstance(viewModel)
+            val fragment = IncomingRequestsDialogFragment.newInstance(viewModel)
 
             // Открываем фрагмент как диалоговое окно
             fragment.show(parentFragmentManager, "incoming_requests_dialog")

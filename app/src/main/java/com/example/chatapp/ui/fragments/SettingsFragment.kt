@@ -1,7 +1,6 @@
 package com.example.chatapp.ui.fragments
 import ContactsApi
 import SettingsViewModel
-import SettingsViewModel.Resource
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
@@ -94,21 +93,6 @@ class SettingsFragment: Fragment() {
 
         binding.changeAvatarButton.setOnClickListener {
             pickImage.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
-        }
-
-        viewModel.uploadState.observe(viewLifecycleOwner) { resource ->
-            when (resource) {
-                is Resource.Loading -> showProgress()
-                is Resource.Success -> {
-                    hideProgress()
-                    showSuccess("Аватар обновлён")
-                }
-
-                is Resource.Error -> {
-                    hideProgress()
-                    showError(resource.error)
-                }
-            }
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->

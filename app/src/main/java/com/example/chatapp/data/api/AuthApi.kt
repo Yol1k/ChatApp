@@ -7,6 +7,7 @@ import com.example.chatapp.data.models.RegisterResponse
 import com.example.chatapp.data.models.UserResponse;
 
 import retrofit2.Call;
+import retrofit2.Response
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -16,7 +17,7 @@ interface AuthApi {
     fun login(@Body request:LoginRequest): Call<LoginResponse>
 
     @POST("/auth/register")
-    fun register(@Body request: RegisterRequest): Call<RegisterResponse>
+    suspend fun register(@Body request: RegisterRequest): Response<RegisterResponse>
 
     @POST("/auth/logout")
     fun logout(): Call<Void>

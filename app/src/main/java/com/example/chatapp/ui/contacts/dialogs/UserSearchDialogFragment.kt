@@ -1,4 +1,4 @@
-package com.example.chatapp.ui.fragments
+package com.example.chatapp.ui.contacts.dialogs
 
 import android.os.Bundle
 import android.text.Editable
@@ -16,7 +16,7 @@ import com.example.chatapp.R
 import com.example.chatapp.ui.contacts.adapters.UserSearchAdapter
 import com.example.chatapp.ui.contacts.view_models.ContactsViewModel
 
-class UserSearchViewModel : DialogFragment() {
+class UserSearchDialogFragment : DialogFragment() {
 
     private lateinit var usersAdapter: UserSearchAdapter
     private lateinit var viewModel: ContactsViewModel
@@ -80,10 +80,11 @@ class UserSearchViewModel : DialogFragment() {
     }
 
     companion object {
-        fun newInstance(viewModel: ContactsViewModel): UserSearchViewModel {
-            val fragment = UserSearchViewModel()
+        fun newInstance(viewModel: ContactsViewModel): UserSearchDialogFragment {
+            val fragment = UserSearchDialogFragment()
             fragment.viewModel = viewModel
             return fragment
         }
     }
+
 }
