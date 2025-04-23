@@ -1,5 +1,6 @@
 package com.example.chatapp.ui.contacts.dialogs
 
+import ContactsApi
 import IncomingRequestsAdapter
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,21 +8,36 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.chatapp.data.api.RetrofitClient
 import com.example.chatapp.ui.contacts.view_models.ContactsViewModel
 import com.example.chatapp.databinding.DialogIncomingRequestsBinding
 
 class IncomingRequestsDialogFragment : DialogFragment() {
-    private lateinit var binding: DialogIncomingRequestsBinding
+
+    companion object {
+        fun newInstance() = IncomingRequestsDialogFragment()
+    }
+
+    private var _binding: DialogIncomingRequestsBinding? = null
+    private val binding get() = _binding!!
+
+    private val contactsApi by lazy {
+        RetrofitClient.create(requireContext(), ContactsApi::class.java)
+    }
+    private val viewModel by viewModels<ContactsViewModel> {
+        ContactsViewModel.getViewModelFactory(contactsApi)
+    }
+
     private lateinit var adapter: IncomingRequestsAdapter
-    private lateinit var viewModel: ContactsViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = DialogIncomingRequestsBinding.inflate(inflater, container, false)
+        _binding = DialogIncomingRequestsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -29,37 +45,7 @@ class IncomingRequestsDialogFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
-        observeRequests()
         loadRequests()
-    }
-
-    private fun setupRecyclerView() {
-        adapter = IncomingRequestsAdapter(
-            requests = emptyList(),
-            onAccept = { request ->
-                viewModel.acceptContactRequest(request.requestId)
-                Toast.makeText(context, "Запрос принят", Toast.LENGTH_SHORT).show()
-            },
-            onDecline = { request ->
-                viewModel.declineContactRequest(request.requestId)
-                Toast.makeText(context, "Запрос отклонен", Toast.LENGTH_SHORT).show()
-            }
-        )
-
-        binding.incomingRequestsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = this@IncomingRequestsDialogFragment.adapter
-        }
-    }
-
-    private fun observeRequests() {
-        viewModel.incomingRequests.observe(viewLifecycleOwner) { requests ->
-            adapter.updateRequests(requests)
-        }
-    }
-
-    private fun loadRequests() {
-        viewModel.loadIncomingRequests()
     }
 
     override fun onStart() {
@@ -70,11 +56,43 @@ class IncomingRequestsDialogFragment : DialogFragment() {
         )
     }
 
-    companion object {
-        fun newInstance(viewModel: ContactsViewModel): IncomingRequestsDialogFragment {
-            val fragment = IncomingRequestsDialogFragment()
-            fragment.viewModel = viewModel
-            return fragment
+    private fun setupRecyclerView() {
+        adapter = IncomingRequestsAdapter(
+            requests = emptyList(),
+            onAccept = { request ->
+                viewModel.acceptContactRequest(request.requestId)
+                showText("Запрос принят")
+            },
+            onDecline = { request ->
+                viewModel.declineContactRequest(request.requestId)
+                showText("Запрос отклонен")
+            }
+        )
+
+        binding.incomingRequestsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = this@IncomingRequestsDialogFragment.adapter
+            setHasFixedSize(true)
         }
+
     }
+
+    private fun showText(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun loadRequests() {
+        viewModel.incomingRequests.observe(viewLifecycleOwner) { requests ->
+            requests?.let {
+                adapter.updateRequests(it)
+            }
+        }
+        viewModel.loadIncomingRequests()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
 }

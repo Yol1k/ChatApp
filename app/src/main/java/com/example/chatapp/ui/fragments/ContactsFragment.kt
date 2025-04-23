@@ -14,10 +14,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chatapp.R
 import com.example.chatapp.data.api.RetrofitClient
+import com.example.chatapp.databinding.DialogSearchUsersBinding
 import com.example.chatapp.ui.contacts.adapters.ContactsAdapter
 import com.example.chatapp.ui.contacts.dialogs.UserSearchDialogFragment
 
 class ContactsFragment: Fragment() {
+
+    private var _binding: FragmentContactsBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var contactsAdapter: ContactsAdapter
 
@@ -28,9 +32,6 @@ class ContactsFragment: Fragment() {
     private val viewModel by viewModels<ContactsViewModel> {
         ContactsViewModel.getViewModelFactory(contactsApi)
     }
-
-    private var _binding: FragmentContactsBinding? = null
-    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,10 +44,9 @@ class ContactsFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val recyclerView = view.findViewById<RecyclerView>(R.id.contactsRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(context)
+        binding.contactsRecyclerView.layoutManager = LinearLayoutManager(context)
         contactsAdapter = ContactsAdapter()
-        recyclerView.adapter = contactsAdapter
+        binding.contactsRecyclerView.adapter = contactsAdapter
 
         viewModel.loadContacts()
 
@@ -61,24 +61,18 @@ class ContactsFragment: Fragment() {
         }
 
         binding.searchUsersButton.setOnClickListener {
-            val dialog = UserSearchDialogFragment.newInstance(viewModel)
+            val dialog = UserSearchDialogFragment.newInstance()
             dialog.show(parentFragmentManager, "SearchUsersDialog")
         }
 
         binding.incomingRequestsButton.setOnClickListener {
-            // Создаем экземпляр фрагмента
-            val fragment = IncomingRequestsDialogFragment.newInstance(viewModel)
-
-            // Открываем фрагмент как диалоговое окно
+            val fragment = IncomingRequestsDialogFragment.newInstance()
             fragment.show(parentFragmentManager, "incoming_requests_dialog")
         }
 
         binding.searchViewContacts.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
-            //Вызывается при нажатии кнопки подтверждения
             override fun onQueryTextSubmit(query: String?) = false
-            //Вызывается при изменении текста
             override fun onQueryTextChange(newText: String?): Boolean {
-            //Фильтруем список используя текст введенный пользователем
                 contactsAdapter.filter.filter(newText)
                 return true
             }

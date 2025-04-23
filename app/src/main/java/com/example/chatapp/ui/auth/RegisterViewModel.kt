@@ -1,7 +1,5 @@
-package com.example.chatapp.ui.contacts.view_models
+package com.example.chatapp.ui.auth
 
-import SettingsViewModel
-import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,9 +14,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 
-class RegisterViewModel(
-    private val authApi: AuthApi
-): ViewModel() {
+class RegisterViewModel(private val authApi: AuthApi): ViewModel() {
 
     companion object{
         fun getViewModelFactory(

@@ -1,11 +1,7 @@
 package com.example.chatapp.ui.contacts.view_models
 
 import ContactsApi
-import android.content.Context
-import android.net.Uri
 import android.util.Log
-import android.webkit.MimeTypeMap
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,17 +9,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.chatapp.ui.contacts.AcceptContactRequest
-import com.example.chatapp.ui.contacts.AddContact
-import com.example.chatapp.ui.contacts.Contact
-import com.example.chatapp.ui.contacts.ContactRequest
-import com.example.chatapp.ui.contacts.DeclineContactRequest
+import com.example.chatapp.ui.contacts.api.AcceptContactRequest
+import com.example.chatapp.ui.contacts.api.AddContact
+import com.example.chatapp.ui.contacts.api.Contact
+import com.example.chatapp.ui.contacts.api.ContactRequest
+import com.example.chatapp.ui.contacts.api.DeclineContactRequest
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.toRequestBody
 
 class ContactsViewModel(val contactsApi: ContactsApi) : ViewModel() {
 

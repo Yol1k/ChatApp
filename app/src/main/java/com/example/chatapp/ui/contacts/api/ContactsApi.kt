@@ -1,9 +1,9 @@
-import com.example.chatapp.ui.contacts.AcceptContactRequest
-import com.example.chatapp.ui.contacts.AddContact
-import com.example.chatapp.ui.contacts.Contact
-import com.example.chatapp.ui.contacts.ContactRequest
-import com.example.chatapp.ui.contacts.DeclineContactRequest
-import com.example.chatapp.ui.contacts.UserResponse
+import com.example.chatapp.ui.contacts.api.AcceptContactRequest
+import com.example.chatapp.ui.contacts.api.AddContact
+import com.example.chatapp.ui.contacts.api.Contact
+import com.example.chatapp.ui.contacts.api.ContactRequest
+import com.example.chatapp.ui.contacts.api.DeclineContactRequest
+import com.example.chatapp.ui.contacts.api.UserResponse
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body

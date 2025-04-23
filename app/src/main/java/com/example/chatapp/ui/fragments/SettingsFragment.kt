@@ -143,11 +143,11 @@ class SettingsFragment: Fragment() {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
     }
 
-    private fun showProgress() {
+    private fun showLoading() {
         binding.progressBar.visibility = View.VISIBLE
     }
 
-    private fun hideProgress() {
+    private fun hideLoading() {
         binding.progressBar.visibility = View.GONE
     }
 

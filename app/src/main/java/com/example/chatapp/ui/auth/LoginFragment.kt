@@ -1,33 +1,33 @@
 package com.example.chatapp.ui.auth
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.chatapp.R
 import com.example.chatapp.data.api.AuthApi
+import com.example.chatapp.data.api.RetrofitClient
 import com.example.chatapp.data.api.TokenManager
-import com.example.chatapp.data.models.LoginRequest
-import com.example.chatapp.data.models.LoginResponse
 import com.example.chatapp.data.models.errors.AuthErrorBody422
 import com.example.chatapp.databinding.FragmentLoginBinding
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import com.example.chatapp.databinding.FragmentRegisterBinding
 
 class LoginFragment: Fragment() {
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
-    private lateinit var authApi: AuthApi
+
+    private val authApi: AuthApi by lazy {
+        RetrofitClient.create(requireContext(), AuthApi::class.java)
+    }
+
+    private val viewModel by viewModels<LoginViewModel> {
+        LoginViewModel.getViewModelFactory(authApi)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,78 +40,66 @@ class LoginFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.nogamenolife.pro/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        authApi = retrofit.create(AuthApi::class.java)
+        viewModel.loginState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is LoginState.Loading -> showLoading()
+                is LoginState.Success -> {
+                    hideLoading()
+                    TokenManager.saveToken(requireContext(), state.token)
+                    findNavController().navigate(R.id.action_authFragment_to_chatsFragment)
+                }
+                is LoginState.Error -> {
+                    hideLoading()
+                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                }
+                is LoginState.ValidationError -> {
+                    hideLoading()
+                    handleValidationErrors(state.errors)
+                }
+            }
+        }
 
         binding.btnLogin.setOnClickListener {
             val username = binding.username.text.toString()
             val password = binding.password.text.toString()
 
             if (username.isEmpty() || password.isEmpty()) {
-                showError("Пожалуйста, заполните все поля")
+                Toast.makeText(requireContext(), "Заполните все поля", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            loginUser(username, password)
+            viewModel.loginUser(username, password)
         }
+    }
+
+    private fun handleValidationErrors(errors: AuthErrorBody422) {
+        with(binding) {
+            loginError.isVisible = false
+            passwordError.isVisible = false
+
+            errors.errors.Login?.firstOrNull()?.let {
+                loginError.text = it
+                loginError.isVisible = true
+            }
+
+            errors.errors.Password?.firstOrNull()?.let {
+                passwordError.text = it
+                passwordError.isVisible = true
+            }
+
+        }
+    }
+
+    private fun showLoading() {
+        binding.progressBar.isVisible = true
+    }
+
+    private fun hideLoading() {
+        binding.progressBar.isVisible = false
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-
-    private fun loginUser(username: String, password: String) {
-        val request = LoginRequest(username, password)
-        val call = authApi.login(request)
-        call.enqueue(object : Callback<LoginResponse> {
-            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
-                if (response.isSuccessful) {
-                    val token = response.body()?.token
-                    if (token != null) {
-                        TokenManager.saveToken(requireContext(), token)
-                        findNavController().navigate(R.id.action_authFragment_to_chatsFragment)
-                    } else {
-                        showError("Ошибка: токен не получен")
-                    }
-                } else if (response.code() == 422) {
-                    val gson = Gson()
-                    val type = object : TypeToken<AuthErrorBody422>() {}.type
-                    var errorResponse: AuthErrorBody422? = gson.fromJson(response.errorBody()!!.charStream(), type)
-                    errorResponse?.errors?.Login?.let { errors ->
-                        binding.loginError.isVisible = true
-                        binding.loginError.text = errors.first()
-                    }
-
-                    errorResponse?.errors?.Password?.let { errors ->
-                        binding.passwordError.isVisible = true
-                        binding.passwordError.text = errors.first()
-                    }
-
-                }
-                else if (response.code() == 400) {
-                    binding.loginOrPasswordError.text = response.errorBody()?.charStream()?.readText()
-                    binding.loginOrPasswordError.isVisible = true
-                }
-                else {
-                    val errorBody = response.errorBody()?.string()
-                    Log.e("NetworkError", "Ошибка сервера: $errorBody")
-                    showError("Ошибка сервера: $errorBody")
-                }
-            }
-
-            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                Log.e("NetworkError", "Ошибка сети", t)
-                showError("Ошибка сети: ${t.message ?: "Неизвестная ошибка"}")
-            }
-        })
-    }
-
-    private fun showError(message: String) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-    }
-
 }

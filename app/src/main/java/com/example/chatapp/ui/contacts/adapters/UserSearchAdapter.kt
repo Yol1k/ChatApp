@@ -1,16 +1,13 @@
 package com.example.chatapp.ui.contacts.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.chatapp.ui.contacts.Contact
+import com.example.chatapp.ui.contacts.api.Contact
 import com.example.chatapp.R
-import com.example.chatapp.ui.contacts.AddContact
+import com.example.chatapp.databinding.ItemSearchUserBinding
+import com.example.chatapp.ui.contacts.api.AddContact
 
 class UserSearchAdapter(
     private var users: List<Contact>,
@@ -18,40 +15,30 @@ class UserSearchAdapter(
 
 ) : RecyclerView.Adapter<UserSearchAdapter.ViewHolder>() {
 
-    enum class ContactStatus {
-        PENDING,    // Запрос отправлен
-        ACCEPTED,   // Контакт добавлен
-        REJECTED,   // Запрос отклонен
-        NOT_ADDED   // Ещё не добавлен
-    }
-
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val contactName: TextView = itemView.findViewById(R.id.contactName)
-        private val addButton: Button = itemView.findViewById(R.id.AddContactButton)
-        private val contactAvatar: ImageView = itemView.findViewById(R.id.contactAvatar)
-        private val placeholderAvatar = R.drawable.ic_person
+    inner class ViewHolder(private val binding: ItemSearchUserBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(contact: Contact) {
-            contactName.text = contact.name
+            with(binding) {
+                contactName.text = contact.name
 
-            Glide.with(itemView.context)
-                .load(contact.avatar) // URL аватара из объекта Contact
-                .placeholder(placeholderAvatar) // Заглушка, если аватар не загружен
-                .error(placeholderAvatar) // Заглушка при ошибке загрузки
-                .circleCrop() // Делаем аватар круглым
-                .into(contactAvatar)
+                Glide.with(root.context)
+                    .load(contact.avatar)
+                    .placeholder(R.drawable.ic_person)
+                    .error(R.drawable.ic_person)
+                    .circleCrop()
+                    .into(contactAvatar)
 
-            addButton.setOnClickListener {
-                val addButton = AddContact(userId = contact.id)
-                onAddClick(addButton)
-                notifyDataSetChanged()
+                AddContactButton.setOnClickListener {
+                    onAddClick(AddContact(userId = contact.id))
+                    notifyItemChanged(adapterPosition)
+                }
             }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_search_user, parent, false)
-        return ViewHolder(view)
+        val binding = ItemSearchUserBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

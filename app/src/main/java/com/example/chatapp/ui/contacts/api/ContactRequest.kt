@@ -1,4 +1,4 @@
-package com.example.chatapp.ui.contacts
+package com.example.chatapp.ui.contacts.api
 
 data class Contact(
     val id: String,
