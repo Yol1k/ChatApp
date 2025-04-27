@@ -6,17 +6,27 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
+import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.example.chatapp.databinding.FragmentContactsBinding
 import com.example.chatapp.ui.contacts.view_models.ContactsViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chatapp.R
 import com.example.chatapp.data.api.RetrofitClient
+import com.example.chatapp.data.api.TokenManager
 import com.example.chatapp.databinding.DialogSearchUsersBinding
+import com.example.chatapp.ui.auth.LoginState
 import com.example.chatapp.ui.contacts.adapters.ContactsAdapter
 import com.example.chatapp.ui.contacts.dialogs.UserSearchDialogFragment
+import com.example.chatapp.ui.contacts.view_models.ContactsState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class ContactsFragment: Fragment() {
 
@@ -43,6 +53,19 @@ class ContactsFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        viewModel.contactsState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is ContactsState.Loading -> showLoading()
+                is ContactsState.Success -> {
+                    hideLoading()
+                }
+                is ContactsState.Error -> {
+                    hideLoading()
+                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
 
         binding.contactsRecyclerView.layoutManager = LinearLayoutManager(context)
         contactsAdapter = ContactsAdapter()
@@ -78,6 +101,14 @@ class ContactsFragment: Fragment() {
             }
         })
 
+    }
+
+    private fun showLoading() {
+        binding.progressBar.isVisible = true
+    }
+
+    private fun hideLoading() {
+        binding.progressBar.isVisible = false
     }
 
     override fun onDestroyView() {

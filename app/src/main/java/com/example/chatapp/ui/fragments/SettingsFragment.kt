@@ -22,6 +22,7 @@ import com.example.chatapp.data.api.AuthApi
 import com.example.chatapp.data.api.RetrofitClient
 import com.example.chatapp.data.models.UserResponse
 import com.example.chatapp.databinding.FragmentSettingsBinding
+import com.example.chatapp.ui.contacts.view_models.ContactsState
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -41,8 +42,7 @@ class SettingsFragment: Fragment() {
     }
 
     private val viewModel by viewModels<SettingsViewModel> {
-        val sharedPrefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        SettingsViewModel.getViewModelFactory(contactsApi, sharedPrefs)
+        SettingsViewModel.getViewModelFactory(contactsApi)
     }
 
     private val pickImage = registerForActivityResult(PickVisualMedia()) { uri: Uri? ->
@@ -57,9 +57,7 @@ class SettingsFragment: Fragment() {
         super.onCreate(savedInstanceState)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         return binding.root
@@ -69,10 +67,23 @@ class SettingsFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Загружаем аватар при открытии
+        viewModel.settingsState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is SettingsState.Loading -> showLoading()
+                is SettingsState.Success -> {
+                    hideLoading()
+                }
+                is SettingsState.Error -> {
+                    hideLoading()
+                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        viewModel.loadUser()
+
         viewModel.loadUserAvatar()
 
-        // Обновляем UI при изменении аватара
         viewModel.avatarUrl.observe(viewLifecycleOwner) { avatarUrl ->
             Glide.with(this)
                 .load(avatarUrl)
@@ -115,8 +126,8 @@ class SettingsFragment: Fragment() {
                         call: Call<UserResponse>,
                         response: Response<UserResponse>
                     ) {
-                        if (response.isSuccessful) {
-                            response.body()?.name.let { name ->
+                        if (response.isSuccessful && isAdded) {
+                            response.body()?.name?.let { name ->
                                 binding.username.text = name
                             }
                         }
@@ -151,32 +162,17 @@ class SettingsFragment: Fragment() {
         binding.progressBar.visibility = View.GONE
     }
 
-    private fun showSuccess(message: String) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun showError(error: Throwable?) {
-        val message = error?.message ?: "Неизвестная ошибка"
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-    }
-
     private fun logout() {
-        // Получаем токен из SharedPreferences
         val token = sharedPreferences.getString("auth_token", null)
 
         if (token != null) {
-            // Вызываем API для выхода
             val call = authApi.logout()
             call.enqueue(object : Callback<Void> {
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
                     if (response.isSuccessful) {
-                        // Очищаем SharedPreferences
                         sharedPreferences.edit().clear().apply()
-
-                        // Перенаправляем пользователя на экран входа
                         findNavController().navigate(R.id.authFragment)
                     } else {
-                        // Обработка ошибки
                         Toast.makeText(
                             requireContext(),
                             "Ошибка при выходе",
@@ -186,7 +182,6 @@ class SettingsFragment: Fragment() {
                 }
 
                 override fun onFailure(call: Call<Void>, t: Throwable) {
-                    // Обработка ошибки сети
                     Toast.makeText(
                         requireContext(),
                         "Ошибка сети: ${t.message}",
@@ -195,7 +190,6 @@ class SettingsFragment: Fragment() {
                 }
             })
         } else {
-            // Если токен отсутствует, просто перенаправляем на экран входа
             findNavController().navigate(R.id.authFragment)
         }
     }

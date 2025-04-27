@@ -23,7 +23,6 @@ class SettingsViewModel(
     companion object {
         fun getViewModelFactory(
             contactsApi: ContactsApi,
-            sharedPreferences: SharedPreferences
         ): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
@@ -42,12 +41,18 @@ class SettingsViewModel(
     private val _userData = MutableLiveData<UserResponse>()
     val userData: LiveData<UserResponse> get() = _userData
 
+    private val _settingsState = MutableLiveData<SettingsState>()
+    val settingsState: LiveData<SettingsState> = _settingsState
+
     fun loadUser() {
+        _settingsState.value=SettingsState.Loading
         viewModelScope.launch {
             try {
                 _userData.value = contactsApi.getUser()
+                _settingsState.value=SettingsState.Success
             } catch (e: Exception) {
                 _errorMessage.value = "Ошибка загрузки данных"
+                _settingsState.value=SettingsState.Error("Данные не загружены")
             }
         }
     }
@@ -117,4 +122,10 @@ class SettingsViewModel(
         }
     }
 
+}
+
+sealed class SettingsState {
+    object Loading : SettingsState()
+    object Success: SettingsState()
+    data class Error(val message: String) : SettingsState()
 }

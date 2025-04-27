@@ -25,7 +25,6 @@ class IncomingRequestsAdapter(
                     .circleCrop()
                     .into(incomingRequestsAvatar)
 
-
                 acceptButton.setOnClickListener {
                     onAccept(request)
                 }
@@ -33,6 +32,7 @@ class IncomingRequestsAdapter(
                 declineButton.setOnClickListener {
                     onDecline(request)
                 }
+
             }
         }
     }

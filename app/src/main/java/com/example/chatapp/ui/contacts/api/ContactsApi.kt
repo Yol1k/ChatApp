@@ -38,7 +38,7 @@ interface ContactsApi {
     suspend fun searchUsers(
         @Query("search") query: String,
         @Query("limit") limit: Int? = null,
-    ): List<Contact>
+    ): Response<List<Contact>>
 
     @GET("/users/user")
     suspend fun getUser(): UserResponse

@@ -1,9 +1,9 @@
 package com.example.chatapp.ui.contacts.dialogs
 
+import ContactsApi
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,11 +15,7 @@ import com.example.chatapp.data.api.RetrofitClient
 import com.example.chatapp.databinding.DialogSearchUsersBinding
 import com.example.chatapp.ui.contacts.adapters.UserSearchAdapter
 import com.example.chatapp.ui.contacts.view_models.ContactsViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.getValue
 
 class UserSearchDialogFragment : DialogFragment() {
@@ -78,14 +74,13 @@ class UserSearchDialogFragment : DialogFragment() {
     private fun setupSearchView() {
         binding.searchViewContacts.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                searchJob?.cancel()
-                searchJob = CoroutineScope(Dispatchers.Main).launch {
-                    delay(300)
-                    s?.toString()?.takeIf { it.length >= 3 }?.let { query ->
+                s?.toString()?.trim()?.let { query ->
+                    if (query.isNotEmpty()) {
                         viewModel.searchUsers(query)
                     }
                 }
             }
+
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
@@ -93,7 +88,6 @@ class UserSearchDialogFragment : DialogFragment() {
 
     private fun observeSearchResults() {
         viewModel.searchResults.observe(viewLifecycleOwner) { users ->
-            Log.d("SearchUsers", "Observed users: $users")
             usersAdapter.updateUsers(users ?: emptyList())
         }
     }

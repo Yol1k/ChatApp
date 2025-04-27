@@ -4,10 +4,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.chatapp.ui.contacts.api.Contact
 import com.example.chatapp.R
 import com.example.chatapp.databinding.ItemSearchUserBinding
 import com.example.chatapp.ui.contacts.api.AddContact
+import com.example.chatapp.ui.contacts.api.Contact
 
 class UserSearchAdapter(
     private var users: List<Contact>,
@@ -28,7 +28,12 @@ class UserSearchAdapter(
                     .circleCrop()
                     .into(contactAvatar)
 
-                AddContactButton.setOnClickListener {
+                contactAvatar.setOnClickListener {
+                    onAddClick(AddContact(userId = contact.id))
+                    notifyItemChanged(adapterPosition)
+                }
+
+                contactName.setOnClickListener {
                     onAddClick(AddContact(userId = contact.id))
                     notifyItemChanged(adapterPosition)
                 }

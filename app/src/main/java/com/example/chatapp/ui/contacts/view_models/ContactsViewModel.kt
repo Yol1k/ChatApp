@@ -1,7 +1,6 @@
 package com.example.chatapp.ui.contacts.view_models
 
 import ContactsApi
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,6 +13,7 @@ import com.example.chatapp.ui.contacts.api.AddContact
 import com.example.chatapp.ui.contacts.api.Contact
 import com.example.chatapp.ui.contacts.api.ContactRequest
 import com.example.chatapp.ui.contacts.api.DeclineContactRequest
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -43,25 +43,37 @@ class ContactsViewModel(val contactsApi: ContactsApi) : ViewModel() {
     private val _searchResults = MutableLiveData<List<Contact>>()
     val searchResults: LiveData<List<Contact>> get() = _searchResults
 
-    private var searchJob: Job? = null
+    val searchUsers: (String) -> Unit = debounce(
+        waitMs = 300L,
+        coroutineScope = viewModelScope,
+        destinationFunction = this::searchUsers
+    )
 
     private val _avatarUrl = MutableLiveData<String?>()
     val avatarUrl: LiveData<String?> = _avatarUrl
 
+    private val _contactsState = MutableLiveData<ContactsState>()
+    val contactsState: LiveData<ContactsState> = _contactsState
+
     fun loadContacts(){
         viewModelScope.launch {
+            _contactsState.value = ContactsState.Loading
             try {
                 val contacts = contactsApi.getContacts()
                 _contacts.value = contacts
+                _contactsState.value = ContactsState.Success
             } catch (e: Exception) {
-                _contacts.value = emptyList() // Очистить список в случае ошибки
+                _contacts.value = emptyList()
+                _contactsState.value = ContactsState.Error("Список контактов не получен")
             }
         }
     }
 
     fun loadIncomingRequests(){
         viewModelScope.launch {
+            _contactsState.value = ContactsState.Loading
             val requests = contactsApi.getInRequests()
+            _contactsState.value = ContactsState.Success
             _incomingRequests.value = requests
         }
     }
@@ -98,23 +110,21 @@ class ContactsViewModel(val contactsApi: ContactsApi) : ViewModel() {
         }
     }
 
-    fun searchUsers(query: String, limit: Int? = null) {
-        if (query.isEmpty()) {
-            _searchResults.value = emptyList() // Показываем пустой список, если запрос пустой
-            return
-        }
-
-        searchJob?.cancel() // Отменяем предыдущий запрос, если он есть
-        searchJob = viewModelScope.launch {
-            delay(300) // Задержка 300 мс перед выполнением запроса
+    fun searchUsers(query: String) {
+        viewModelScope.launch {
+            _contactsState.value = ContactsState.Loading
             try {
-                val results = contactsApi.searchUsers(query, limit)
-                Log.d("SearchUsers", "API results: $results")
-                _searchResults.value = results
+                val response = contactsApi.searchUsers(query)
+                if (response.isSuccessful) {
+                    _searchResults.value = response.body()?: emptyList()
+                    _contactsState.value = ContactsState.Success
+                } else {
+                    _searchResults.value = emptyList()
+                    _contactsState.value = ContactsState.Success
+                }
             } catch (e: Exception) {
-                // Обработка ошибки
-                Log.e("SearchUsers", "Error: ${e.message}", e)
                 _searchResults.value = emptyList()
+                _contactsState.value = ContactsState.Error("Список пользователей не получен")
             }
         }
     }
@@ -123,4 +133,57 @@ class ContactsViewModel(val contactsApi: ContactsApi) : ViewModel() {
         _searchResults.value = emptyList()
     }
 
+    fun <T> debounce(
+        waitMs: Long = 300L,
+        coroutineScope: CoroutineScope,
+        destinationFunction: (T) -> Unit
+    ): (T) -> Unit {
+        var debounceJob: Job? = null
+        return { param: T ->
+            debounceJob?.cancel()
+            debounceJob = coroutineScope.launch {
+                delay(waitMs)
+                destinationFunction(param)
+            }
+        }}
+
+    fun <T> throttleFirst(
+        skipMs: Long = 300L,
+        coroutineScope: CoroutineScope,
+        destinationFunction: (T) -> Unit
+    ): (T) -> Unit {
+        var throttleJob: Job? = null
+        return { param: T ->
+            if (throttleJob?.isCompleted != false) {
+                throttleJob = coroutineScope.launch {
+                    destinationFunction(param)
+                    delay(skipMs)
+                }
+            }
+        }
+    }
+
+    fun <T> throttleLatest(
+        intervalMs: Long = 300L,
+        coroutineScope: CoroutineScope,
+        destinationFunction: (T) -> Unit
+    ): (T) -> Unit {
+        var throttleJob: Job? = null
+        var latestParam: T
+        return { param: T ->
+            latestParam = param
+            if (throttleJob?.isCompleted != false) {
+                throttleJob = coroutineScope.launch {
+                    delay(intervalMs)
+                    destinationFunction(latestParam)
+                }
+            }
+        }
+    }
+
+}
+sealed class ContactsState {
+    object Loading : ContactsState()
+    object Success: ContactsState()
+    data class Error(val message: String) : ContactsState()
 }

@@ -11,8 +11,13 @@ import com.bumptech.glide.Glide
 import com.example.chatapp.ui.contacts.api.Contact
 import com.example.chatapp.R
 import android.widget.ImageView
+import com.example.chatapp.databinding.DialogSearchUsersBinding
+import com.example.chatapp.databinding.FragmentContactsBinding
+import com.example.chatapp.databinding.ItemContactBinding
 
 class ContactsAdapter : RecyclerView.Adapter<ContactsAdapter.ViewHolder>(), Filterable {
+    private var _binding: ItemContactBinding? = null
+    private val binding get() = _binding!!
 
     private var contacts = listOf<Contact>()
 
@@ -35,10 +40,10 @@ class ContactsAdapter : RecyclerView.Adapter<ContactsAdapter.ViewHolder>(), Filt
             contactName.text = contact.name
 
             Glide.with(itemView.context)
-                .load(contact.avatar) // URL аватара из объекта Contact
-                .placeholder(placeholderAvatar) // Заглушка, если аватар не загружен
-                .error(placeholderAvatar) // Заглушка при ошибке загрузки
-                .circleCrop() // Делаем аватар круглым
+                .load(contact.avatar)
+                .placeholder(placeholderAvatar)
+                .error(placeholderAvatar)
+                .circleCrop()
                 .into(contactAvatar)
         }
 

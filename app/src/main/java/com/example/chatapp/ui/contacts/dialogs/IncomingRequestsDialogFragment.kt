@@ -7,12 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.chatapp.data.api.RetrofitClient
-import com.example.chatapp.ui.contacts.view_models.ContactsViewModel
 import com.example.chatapp.databinding.DialogIncomingRequestsBinding
+import com.example.chatapp.ui.contacts.view_models.ContactsState
+import com.example.chatapp.ui.contacts.view_models.ContactsViewModel
 
 class IncomingRequestsDialogFragment : DialogFragment() {
 
@@ -43,6 +45,19 @@ class IncomingRequestsDialogFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        viewModel.contactsState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is ContactsState.Loading -> showLoading()
+                is ContactsState.Success -> {
+                    hideLoading()
+                }
+                is ContactsState.Error -> {
+                    hideLoading()
+                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
 
         setupRecyclerView()
         loadRequests()
@@ -88,6 +103,14 @@ class IncomingRequestsDialogFragment : DialogFragment() {
             }
         }
         viewModel.loadIncomingRequests()
+    }
+
+    private fun showLoading() {
+        binding.progressBar.isVisible = true
+    }
+
+    private fun hideLoading() {
+        binding.progressBar.isVisible = false
     }
 
     override fun onDestroyView() {
